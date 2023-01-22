@@ -76,7 +76,7 @@ module.exports = {
         //   loader: "babel-loader",
         //   options: {
         //     // we can set this inside .babelrc also
-        //     preset: ["@babel/preset-env", "@babel/preset-typescript"],
+        //     preset: ["@babel/preset-env"],
         //   },
         // },
       },
