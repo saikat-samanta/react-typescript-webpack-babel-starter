@@ -65,7 +65,19 @@ module.exports = {
       // loader for css
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"],
+        use: [
+          {
+            loader: "style-loader",
+          },
+          {
+            loader: "css-loader",
+            options: {
+              modules: {
+                localIdentName: "[local]",
+              },
+            },
+          },
+        ],
       },
       // babel loader
       {
@@ -95,7 +107,7 @@ module.exports = {
       title: "Webpack app",
       filename: "index.html",
       // with template set webpack will use this template inside bundle
-      template: "./src/index.html",
+      template: "./public/index.html",
     }),
   ],
 };
