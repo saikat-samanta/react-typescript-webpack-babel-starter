@@ -1,113 +1,155 @@
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const webpack = require("webpack");
 const path = require("path");
-const HTMLWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
+const openBrowser = require("react-dev-utils/openBrowser");
+const Dotenv = require("dotenv-webpack");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
+require("dotenv").config();
 
-module.exports = {
-  // dev/prod mode
-  mode: "development",
-  // entry point for webpack, for single entry point
-  // entry: path.resolve(__dirname, "./src"),
+const getENVFile = (_env) => {
+  return path.join(__dirname, ".env");
+};
 
-  // for multiple entry point object key and bundle file name will be same when output['filename'] is not hardcoded.
-  entry: {
-    bundle: path.resolve(__dirname, "./src"),
-    // path: path.resolve(__dirname, "./src"),
-  },
-
-  // output of webpack
-  output: {
-    // output path
-    path: path.resolve(__dirname, "./dist"),
-
-    // bundle file name is fixed and always be bundle.js
-    // filename: "bundle.js",
-
-    // [name] will take the entry object key.
-    // filename: "[name].js",
-    //we can also create content hash with file name
-    filename: "[name].[contenthash].js",
-
-    // clean bundle before every build
-    clean: true,
-
-    // image name after bundling
-    assetModuleFilename: "[name][ext]",
-  },
-
-  // which file should be handle. (for typescript)
-  resolve: {
-    extensions: ["*", ".js", ".jsx", ".tsx", ".ts"],
-  },
-
-  // source map for debug
-  devtool: "source-map",
-
-  // webpack dev server
-  devServer: {
-    static: {
-      // path which will serve
-      directory: path.resolve(__dirname, "./dist"),
+const getWebpackConfig = (env) => {
+  /** @type {import('webpack').Configuration} */
+  const config = {
+    mode: env.production ? "production" : "development",
+    target: "web",
+    entry: path.resolve(__dirname, "src"),
+    output: {
+      path: path.resolve(__dirname, "build"),
+      filename: "[name].[contenthash].js",
+      clean: true,
+      asyncChunks: true,
+      globalObject: "this",
+      publicPath: "/",
     },
-    // change default port
-    port: 3000,
-    // automatically open browser
-    open: true,
-    // hot reload enable
-    hot: true,
-    liveReload: true,
-    // enable gzip compression
-    compress: true,
-    historyApiFallback: true,
-  },
-
-  // Loader
-  module: {
-    rules: [
-      // loader for css
-      {
-        test: /\.css$/,
-        use: [
-          {
-            loader: "style-loader",
+    resolve: {
+      extensions: [".tsx", ".jsx", ".ts", ".js", ".css", ".scss", ".sass"],
+    },
+    optimization: {
+      minimize: env.production,
+      moduleIds: "deterministic",
+      runtimeChunk: "single",
+      splitChunks: {
+        chunks: "all",
+        maxInitialRequests: Infinity,
+        minSize: 0,
+      },
+    },
+    devtool: env.production ? "source-map" : "inline-source-map",
+    devServer: {
+      static: {
+        directory: path.join(__dirname, "build"),
+        publicPath: "/",
+        serveIndex: true,
+        watch: true,
+      },
+      open: false,
+      onListening: function (devServer) {
+        const { port } = devServer.server.address();
+        openBrowser(`https://localhost:${port}`);
+      },
+      hot: !env.production,
+      devMiddleware: {
+        index: true,
+        mimeTypes: { html: "text/html" },
+        serverSideRender: true,
+        writeToDisk: true,
+      },
+      historyApiFallback: true,
+      compress: env.production,
+    },
+    module: {
+      rules: [
+        {
+          test: /\.m?js/,
+          resolve: {
+            fullySpecified: false, // Ref: https://webpack.js.org/configuration/module/#resolvefullyspecified
           },
-          {
-            loader: "css-loader",
-            options: {
-              modules: {
-                localIdentName: "[local]",
+        },
+        {
+          test: /\.(ts|js)x?$/,
+          exclude: /node_modules/,
+          use: "babel-loader",
+        },
+        {
+          test: /\.(css|s[ac]ss)$/i, // This regex matches both .scss and .sass files
+          use: [
+            MiniCssExtractPlugin.loader,
+            "css-loader",
+            {
+              loader: "sass-loader",
+              options: {
+                sourceMap: true,
               },
+            },
+          ],
+        },
+        // image loader. It's need changes in output object
+        {
+          test: /\.(png|jpg|jpeg|gif)$/i,
+          type: "asset/resource",
+        },
+        {
+          test: /\.svg$/,
+          use: ["@svgr/webpack"],
+        },
+      ],
+    },
+    plugins: [
+      new CopyPlugin({
+        // # Need to come before HtmlWebpackPlugin
+        patterns: [
+          {
+            from: "./public",
+            globOptions: {
+              ignore: ["**/index.html"],
             },
           },
         ],
-      },
-      // babel loader
-      {
-        test: /\.(js|jsx|tsx|ts)$/,
-        exclude: /node_modules/,
-        use: ["babel-loader", "ts-loader"],
-        // use: {
-        //   loader: "babel-loader",
-        //   options: {
-        //     // we can set this inside .babelrc also
-        //     preset: ["@babel/preset-env"],
-        //   },
-        // },
-      },
-      // image loader. It's need changes in output object
-      {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        type: "asset/resource",
-      },
-    ],
-  },
+      }),
+      new HtmlWebpackPlugin({
+        title: "React Webpack App",
+        filename: "index.html",
+        template: "public/index.html",
+      }),
+      // # Gives the build progress
+      new webpack.ProgressPlugin(),
 
-  // plugins
-  plugins: [
-    // this will create html file inside bundle.
-    new HTMLWebpackPlugin({
-      title: "Webpack app",
-      filename: "index.html",
-      // with template set webpack will use this template inside bundle
-      template: "./public/index.html",
-    }),
-  ],
+      // # This plugin extracts CSS into separate files. It creates a CSS file per JS file which contains CSS. It supports On-Demand-Loading of CSS and SourceMaps (if source maps are enabled).
+      new MiniCssExtractPlugin({
+        filename: "[name].css",
+      }),
+      new Dotenv({
+        path: getENVFile(env),
+        defaults: path.join(__dirname, ".env"),
+      }),
+      sentryWebpackPlugin({
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: "org-name",
+        project: "project-name",
+        include: {
+          paths: ["."],
+          // # URL prefix to add to the beginning of all filenames. Defaults to ~/ but you might want to set this to the full URL. This is also useful if your files are stored in a sub folder. eg: url-prefix '~/static/js'
+          urlPrefix: "~/",
+        },
+        ext: ["map", "js"],
+        ignore: ["node_modules", "webpack.config.js"],
+      }),
+      new BundleAnalyzerPlugin({
+        analyzerMode: "static",
+        openAnalyzer: !!env.analyze,
+      }),
+    ],
+  };
+  return config;
+};
+
+module.exports = (env) => {
+  const webpackConfig = getWebpackConfig(env);
+  return webpackConfig;
 };

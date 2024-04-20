@@ -1,0 +1,25 @@
+{
+  "printWidth": 120,
+  "arrowParens": "always",
+  "endOfLine": "auto",
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "semi": true,
+  "tabWidth": 2,
+  "useTabs": false,
+  "trailingComma": "es5",
+  "singleQuote": false,
+  "jsxSingleQuote": false,
+  "proseWrap": "preserve",
+  "quoteProps": "as-needed",
+  "htmlWhitespaceSensitivity": "css",
+  "singleAttributePerLine": true,
+  "overrides": [
+    {
+      "files": "*.tsx",
+      "options": {
+        "printWidth": 100
+      }
+    }
+  ]
+}
