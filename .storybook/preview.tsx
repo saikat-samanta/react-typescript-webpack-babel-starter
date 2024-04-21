@@ -14,17 +14,7 @@ const MyDocsContainer: React.FC<React.PropsWithChildren<DocsContainerProps>> = (
   return (
     <DocsContainer
       {...props}
-      theme={
-        darkMode
-          ? {
-              ...themes.dark,
-              appContentBg: "transparent",
-            }
-          : {
-              ...themes.light,
-              appContentBg: "transparent",
-            }
-      }
+      theme={darkMode ? themes.dark : themes.light}
     >
       {children}
     </DocsContainer>

@@ -38,14 +38,19 @@ module.exports = {
   rules: {
     "no-console": "warn",
     "no-use-before-define": ["error", "nofunc"],
+    "@typescript-eslint/consistent-type-imports": "error", // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/consistent-type-imports.md#enforces-consistent-usage-of-type-imports-consistent-type-imports
+    "@typescript-eslint/array-type": [
+      "error",
+      {
+        default: "array",
+      },
+    ],
+    "@typescript-eslint/prefer-reduce-type-parameter": "error",
+    "@typescript-eslint/no-redeclare": "off", // Done because we want to allow using same names for type and const
     "@typescript-eslint/no-use-before-define": ["error", "nofunc"],
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/ban-ts-comment": 0,
-    "@typescript-eslint/no-var-requires": 0,
-    "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/no-non-null-assertion": 0,
     "react/prop-types": "off",
-    "testing-library/prefer-screen-queries": 0,
+    "testing-library/prefer-screen-queries": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
