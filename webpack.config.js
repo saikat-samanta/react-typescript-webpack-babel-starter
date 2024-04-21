@@ -53,6 +53,7 @@ const getWebpackConfig = (env) => {
         const { port } = devServer.server.address();
         openBrowser(`http://localhost:${port}`);
       },
+      port: process.env.PORT || 3000,
       hot: !env.production,
       devMiddleware: {
         index: true,

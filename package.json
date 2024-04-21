@@ -6,7 +6,7 @@
   "license": "ISC",
   "author": "",
   "scripts": {
-    "analyze": "webpack serve --config webpack.config.js --env production --env analyze --port 44320 --server-type https",
+    "analyze": "webpack serve --config webpack.config.js --env production --env analyze",
     "build": "webpack --config webpack.config.js --env $(node ./scripts/get-env.js WEB_ENV)",
     "build-storybook": "storybook build",
     "clean": "rimraf node_modules build coverage",
