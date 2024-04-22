@@ -10,7 +10,7 @@
     "build": "webpack --config webpack.config.js --env $(node ./scripts/get-env.js WEB_ENV)",
     "build-storybook": "storybook build",
     "clean": "rimraf node_modules build coverage",
-    "lint": "eslint . --fix --ignore-path ./.eslintignore",
+    "lint": "eslint . --fix --ignore-path ./.eslintignore --cache",
     "pretty": "prettier --write . && sort-package-json",
     "start": "webpack serve --config webpack.config.js",
     "storybook": "storybook dev -p 6006",
@@ -28,6 +28,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "resolutions": {
+    "strip-ansi": "^6.0.1"
+  },
+  "overrides": {
+    "strip-ansi": "^6.0.1"
   },
   "dependencies": {
     "@sentry/react": "^7.110.1",

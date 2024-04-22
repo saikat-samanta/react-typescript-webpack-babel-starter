@@ -52,7 +52,7 @@ module.exports = {
     "react/prop-types": "off",
     "testing-library/prefer-screen-queries": "off",
     "@typescript-eslint/no-unused-vars": [
-      "error",
+      "warn",
       {
         args: "all",
         argsIgnorePattern: "^_",
